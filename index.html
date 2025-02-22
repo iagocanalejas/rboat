@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <title>RBoat</title>
+
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="author" content="Iago Santos Domínguez" />
+
+        <meta property="og:title" content="RBoat" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="" />
+        <meta property="og:image:width" content="" />
+        <meta property="og:image:height" content="" />
+        <meta property="og:description" content="" />
+        <meta property="og:url" content="https://tiempos-traineras.com" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@iagocanalejas" />
+        <meta name="twitter:title" content="RBoat" />
+        <meta name="twitter:description" content="" />
+        <meta name="twitter:image" content="" />
+
+        <!--<base href="/tiempos-traineras.com/" />-->
+
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        />
+
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+        <link rel="stylesheet" href="./src/styles.css" />
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li>
+                        <label for="input-upload" class="upload-btn">
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M12 16V4M12 4L7 9M12 4L17 9"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                                <path
+                                    d="M4 17V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V17"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+                        </label>
+                        <input id="input-upload" type="file" accept="application/json" />
+                    </li>
+                    <li><a id="link-batel" href="#" class="active">Batel</a></li>
+                    <li><a id="link-trainerilla" href="#">Trainerilla</a></li>
+                    <li><a id="link-trainera" href="#">Trainera</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main class="container">
+            <section class="box">
+                <r-boat-config></r-boat-config>
+                <r-batel></r-batel>
+                <r-trainerilla class="hidden"></r-trainerilla>
+                <r-trainera class="hidden"></r-trainera>
+            </section>
+            <section class="box">
+                <div id="results" class="results">
+                    <h2>Resultados</h2>
+                    <div id="center">
+                        <span>Centro de Gravedad (desde proa)</span>
+                        <span id="gravity-center-result">---</span>
+                    </div>
+                    <div id="ratio">
+                        <span>Ratio (mayor igual mas peso en proa)</span>
+                        <span id="ratio-result">---</span>
+                    </div>
+                </div>
+                <div><button id="calculate" class="button">Calcular</button></div>
+                <div><button id="save" class="button">Guardar</button></div>
+            </section>
+        </main>
+        <footer></footer>
+        <script type="module" src="./src/scripts.js"></script>
+    </body>
+</html>

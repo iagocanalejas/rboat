@@ -1,0 +1,363 @@
+/******************************************************************************/
+/*******************************RESET DE ESTILOS*******************************/
+/******************************************************************************/
+
+html {
+    --gap: 20px;
+    --panel-width: 350px;
+    --header-height: 55px;
+
+    /* Parte de la paleta de Tailwind */
+    /* Véase https://tailwindcss.com/docs/customizing-colors */
+    --color-neutral-50: #fafafa;
+    --color-neutral-100: #f5f5f5;
+    --color-neutral-200: #e5e5e5;
+    --color-neutral-300: #d4d4d4;
+    --color-neutral-400: #a3a3a3;
+    --color-neutral-500: #737373;
+    --color-neutral-600: #525252;
+    --color-neutral-700: #404040;
+    --color-neutral-800: #262626;
+    --color-neutral-900: #171717;
+    --color-yellow-500: #eab308;
+    --color-red-600: #dc2626;
+
+    margin: 0 var(--gap);
+    font-family: "Inter", sans-serif;
+    font-weight: 300;
+    background: var(--color-neutral-900);
+    color: var(--color-neutral-200);
+    scroll-behavior: smooth;
+    user-select: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    z-index: 1;
+    box-sizing: border-box;
+    align-items: center;
+    border-bottom: 1px solid var(--color-neutral-800);
+    box-shadow: 0 5px 5px #1c191750;
+    background-color: #171717f0;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+main {
+    position: relative;
+    top: calc(var(--header-height) + var(--gap));
+    width: 100%;
+    transition: 750ms ease transform;
+}
+
+@media (max-width: 1536px) {
+}
+
+@media (max-width: 1280px) {
+    html {
+        --gap: 16px;
+    }
+
+    header rs-logo {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    html {
+        --gap: 14px;
+        --panel-width: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    html {
+        --panel-width: 100%;
+        --header-height: 50px;
+    }
+}
+
+@media (max-width: 640px) {
+    html {
+        --header-height: 45px;
+    }
+}
+
+/******************************************************************************/
+/**********************************MAIN CLASSES********************************/
+/******************************************************************************/
+.container {
+    display: flex;
+}
+
+.box {
+    float: left;
+    width: 50%;
+}
+
+.hidden {
+    display: none;
+}
+
+.error {
+    color: red !important;
+}
+
+/******************************************************************************/
+/*************************************NAVBAR***********************************/
+/******************************************************************************/
+nav {
+    background: #1e1e1e;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
+    max-width: 400px;
+    margin: 20px auto;
+}
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+nav li {
+    margin: 0;
+}
+nav a {
+    text-decoration: none;
+    color: #ddd;
+    font-size: 14px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+nav a:hover {
+    background: #444;
+    color: #fff;
+}
+nav a.active {
+    background: #555;
+    color: #fff;
+    font-weight: bold;
+    border: 1px solid #777;
+}
+
+/* Styled Upload Button */
+.upload-btn {
+    background: #444;
+    color: #ddd;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    margin-right: 20px;
+}
+
+.upload-btn:hover {
+    background: #666;
+    box-shadow: 0 0 5px rgba(200, 200, 200, 0.2);
+}
+
+/* SVG Icon Styling */
+.upload-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: #ddd;
+    stroke-width: 2;
+}
+
+.upload-btn label {
+}
+
+/* Hide Default File Input */
+#input-upload {
+    display: none;
+}
+/******************************************************************************/
+/*************************************FORMS************************************/
+/******************************************************************************/
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #bbb;
+    font-size: 14px;
+}
+
+input,
+select {
+    padding: 10px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+input {
+    width: calc(100% - 20px);
+}
+select {
+    width: 100%;
+}
+
+input:hover,
+select:hover {
+    border-color: #666;
+}
+
+input:focus,
+select:focus {
+    border-color: #888;
+    outline: none;
+    box-shadow: 0 0 5px rgba(200, 200, 200, 0.2);
+}
+
+input::placeholder {
+    color: #777;
+}
+
+select {
+    appearance: none;
+    cursor: pointer;
+}
+
+/******************************************************************************/
+/********************************RESULT SECTION********************************/
+/******************************************************************************/
+.results {
+    max-width: min(60%, 400px);
+    margin: 20px auto;
+    padding: 20px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
+    color: #ddd;
+}
+
+.results div {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.results div:last-child {
+    border-bottom: none;
+}
+
+.results span {
+    font-size: 14px;
+    color: #bbb;
+}
+
+.results h2 {
+    text-align: center;
+    color: #ddd;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+/******************************************************************************/
+/*************************************BUTTONS**********************************/
+/******************************************************************************/
+.button {
+    display: block;
+    max-width: min(60%, 400px);
+    width: min(60%, 400px);
+    padding: 10px;
+    margin: 20px auto;
+    background: #444;
+    color: #ddd;
+    border: 1px solid #555;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.button:hover {
+    background: #666;
+    box-shadow: 0 0 5px rgba(200, 200, 200, 0.2);
+}
+
+.button:active {
+    background: #888;
+}
+
+/******************************************************************************/
+/***********************************COLLAPSIBLE********************************/
+/******************************************************************************/
+.collapsible {
+    max-width: min(60%, 400px);
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: #ddd;
+    background: #1e1e1e;
+    margin: 30px auto;
+}
+
+.collapsible form {
+    padding: 20px;
+    display: block;
+}
+
+.collapsible .form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 15px;
+    margin: 0 auto;
+    cursor: pointer;
+    color: #ddd;
+    background: #1e1e1e;
+    font-size: 20px;
+    font-weight: bold;
+    transition: background 0.3s;
+    border: none;
+    border-bottom: 1px solid #333;
+}
+
+.collapsible .form-header:hover {
+    background: #252525;
+}
+
+.collapsible .arrow {
+    transition: 0.3s ease transform;
+    font-size: 20px;
+    color: #bbb;
+}

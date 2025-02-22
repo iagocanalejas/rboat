@@ -1,0 +1,12 @@
+{
+	"name": "rboat",
+	"type": "module",
+	"license": "LICENSE.md",
+	"author": "Iago Santos Domínguez",
+	"scripts": {
+		"serve": "node run.js"
+	},
+	"devDependencies": {
+		"live-server": "^1.2.0"
+	}
+}

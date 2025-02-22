@@ -1,0 +1,63 @@
+{
+    "boat": {
+        "length": 7000,
+        "bowFloatingLine": 430,
+        "sternFloatingLine": 410,
+        "weight": 63,
+        "ballast": 7,
+        "ballastPosition": 4480,
+        "ribs": [
+            5590,
+            4480,
+            3370,
+            2260,
+            1150
+        ],
+        "rowlocks": [
+            660,
+            720,
+            680,
+            700
+        ],
+        "rowlockGap": 20
+    },
+    "seats": [
+        {
+            "position": "COXSWAIN",
+            "weight": 55,
+            "benchDistance": 625
+        },
+        {
+            "position": "1",
+            "weight": 76,
+            "benchDistance": 620,
+            "rowlockHole": 5,
+            "side": "PORT"
+        },
+        {
+            "position": "2",
+            "weight": 76,
+            "benchDistance": 630,
+            "rowlockHole": 8,
+            "side": "STARBOARD"
+        },
+        {
+            "position": "3",
+            "weight": 86,
+            "benchDistance": 640,
+            "rowlockHole": 8,
+            "side": "PORT"
+        },
+        {
+            "position": "4",
+            "weight": 71,
+            "benchDistance": 610,
+            "rowlockHole": 10,
+            "side": "STARBOARD"
+        }
+    ],
+    "result": {
+        "ratio": -14.725,
+        "centerOfGravity": 3025.8640552995394
+    }
+}

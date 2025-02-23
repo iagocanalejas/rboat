@@ -74,6 +74,7 @@ customElements.define(
 
 		connectedCallback() {
 			this.form = this.shadowRoot.querySelector("form");
+			this.formHeader = this.shadowRoot.querySelector(".form-header");
 			this.arrow = this.shadowRoot.querySelector(".arrow");
 			this.nameSpan = this.shadowRoot.querySelector("#name");
 
@@ -86,7 +87,7 @@ customElements.define(
 
 			this.form.addEventListener("change", () => this.onChange());
 
-			this.shadowRoot.querySelector(".form-header").addEventListener("click", () => {
+			this.formHeader.addEventListener("click", () => {
 				if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
 					this.form.style.display = "block";
 					this.arrow.style.transform = "rotate(180deg)";
@@ -130,6 +131,8 @@ customElements.define(
 
 		#clearErrors() {
 			Object.values(this.errors).forEach((error) => (error.textContent = ""));
+			this.formHeader.classList.toggle("error", !isValid);
+			this.arrow.classList.toggle("error", !isValid);
 		}
 
 		/** @returns {bool} */
@@ -143,7 +146,7 @@ customElements.define(
 				this.errors.benchDistance.textContent = "La distancia de la bancada debe estar entre 500 y 900 mm";
 				isValid = false;
 			}
-			this.shadowRoot.querySelector(".form-header").classList.toggle("error", !isValid);
+			this.formHeader.classList.toggle("error", !isValid);
 			this.arrow.classList.toggle("error", !isValid);
 			return isValid;
 		}

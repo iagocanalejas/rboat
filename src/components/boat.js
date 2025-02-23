@@ -72,6 +72,7 @@ customElements.define(
 
 		/** @param {string} value */
 		set boatType(value) {
+			this.#clearErrors();
 			this.#_boatType = value;
 			this.boatNameSpan.textContent = value;
 		}
@@ -84,6 +85,7 @@ customElements.define(
 
 		connectedCallback() {
 			this.form = this.shadowRoot.querySelector("#boat-form");
+			this.formHeader = this.shadowRoot.querySelector(".form-header");
 			this.arrow = this.shadowRoot.querySelector(".arrow");
 			this.boatNameSpan = this.shadowRoot.querySelector("#boat-name");
 
@@ -101,7 +103,7 @@ customElements.define(
 
 			this.form.addEventListener("change", () => this.onChange());
 
-			this.shadowRoot.querySelector(".form-header").addEventListener("click", () => {
+			this.formHeader.addEventListener("click", () => {
 				if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
 					this.form.style.display = "block";
 					this.arrow.style.transform = "rotate(180deg)";
@@ -154,6 +156,8 @@ customElements.define(
 
 		#clearErrors() {
 			Object.values(this.errors).forEach((error) => (error.textContent = ""));
+			this.formHeader.classList.toggle("error", false);
+			this.arrow.classList.toggle("error", false);
 		}
 
 		/** @returns {bool} */
@@ -203,7 +207,7 @@ customElements.define(
 				}
 			}
 
-			this.shadowRoot.querySelector(".form-header").classList.toggle("error", !isValid);
+			this.formHeader.classList.toggle("error", !isValid);
 			this.arrow.classList.toggle("error", !isValid);
 			return isValid;
 		}

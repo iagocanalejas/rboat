@@ -64,18 +64,16 @@
                         </label>
                         <input id="input-upload" type="file" accept="application/json" />
                     </li>
-                    <li><a id="link-batel" href="#" class="active">Batel</a></li>
-                    <li><a id="link-trainerilla" href="#">Trainerilla</a></li>
-                    <li><a id="link-trainera" href="#">Trainera</a></li>
+                    <li><a id="link-batel" href="#" class="active" seats="4">Batel</a></li>
+                    <li><a id="link-trainerilla" href="#" seats="6">Trainerilla</a></li>
+                    <li><a id="link-trainera" href="#" seats="13">Trainera</a></li>
                 </ul>
             </nav>
         </header>
         <main class="container">
             <section class="box">
                 <r-boat-config></r-boat-config>
-                <r-batel></r-batel>
-                <r-trainerilla class="hidden"></r-trainerilla>
-                <r-trainera class="hidden"></r-trainera>
+                <r-rowers-config seats="4"></r-rowers-config>
             </section>
             <section class="box">
                 <div id="results" class="results">

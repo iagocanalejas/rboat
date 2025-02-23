@@ -1,8 +1,6 @@
 import "./data/types.js";
-import "./components/boat_config.js";
-import "./components/batel.js";
-import "./components/trainerilla.js";
-import "./components/trainera.js";
+import "./components/boat.js";
+import "./components/rowers.js";
 
 import { DEFAULT_BOAT } from "./data/values.js";
 
@@ -25,17 +23,21 @@ class App {
 
 	constructor() {
 		this.boatConfig = document.querySelector("r-boat-config");
-
-		this.boats = ["batel", "trainerilla", "trainera"];
-		this.boatElements = this.boats.map((boat) => ({
-			element: document.querySelector(`r-${boat}`),
-			link: document.querySelector(`#link-${boat}`),
-		}));
+		this.rowersConfig = document.querySelector("r-rowers-config");
+		this.rowersConfig.numSeats = 4;
 
 		document.querySelector("#calculate").addEventListener("click", () => this.#calculate());
 		document.querySelector("#save").addEventListener("click", () => this.#save());
 		document.querySelector("#input-upload").addEventListener("change", (e) => this.#upload(e));
-		this.boatElements.forEach(({ link }) => link.addEventListener("click", (e) => this.#onNavItemClick(e, link)));
+
+		this.boatLinks = [
+			document.querySelector("#link-batel"),
+			document.querySelector("#link-trainerilla"),
+			document.querySelector("#link-trainera"),
+		];
+		this.boatLinks.forEach((link) =>
+			link.addEventListener("click", (e) => this.#onNavItemClick(e, link, parseInt(link.getAttribute("seats")))),
+		);
 	}
 
 	/** @param {BoatConfig} boat */
@@ -55,7 +57,6 @@ class App {
 
 	#calculate() {
 		if (!this.#isValid()) return;
-
 		console.log("Calculating...");
 
 		this.result = {
@@ -66,6 +67,7 @@ class App {
 
 	#save() {
 		if (!this.#result) return;
+		console.log("Saving file...");
 
 		const data = {
 			boat: this.#boat,
@@ -97,41 +99,33 @@ class App {
 		document.querySelector("r-boat-config").boat = this.#boat;
 
 		if (this.#seats.length === 5) {
-			this.boatElements[0].link.click();
-			this.boatElements[0].element.seats = this.#seats;
+			this.boatLinks[0].click();
 		} else if (this.#seats.length === 7) {
-			this.boatElements[1].link.click();
-			this.boatElements[1].element.seats = this.#seats;
+			this.boatLinks[1].click();
 		} else {
-			this.boatElements[2].link.click();
-			this.boatElements[2].element.seats = this.#seats;
+			this.boatLinks[2].click();
 		}
+		this.rowersConfig.seats = this.#seats;
 	}
 
 	/**
 	 * @param {MouseEvent} event
 	 * @param {HTMLElement} clickedLink
+	 * @param {number} numSeats
 	 */
-	#onNavItemClick(event, clickedLink) {
+	#onNavItemClick(event, clickedLink, numSeats) {
 		event.preventDefault();
 
 		this.boatConfig.boatType = clickedLink.textContent;
-		this.boatElements.forEach(({ link, element }) => {
-			element.classList.toggle("hidden", link !== clickedLink);
-			link.classList.toggle("active", link === clickedLink);
-		});
+		this.rowersConfig.numSeats = numSeats;
+		this.boatLinks.forEach((link) => link.classList.toggle("active", link === clickedLink));
 	}
 
 	/** @returns {bool} */
 	#isValid() {
 		var isValid = this.boatConfig.isValid();
-		this.boatElements.forEach(({ element }) => {
-			if (!element.classList.contains("hidden")) {
-				const isElementValid = element.isValid();
-				isValid = isValid && isElementValid;
-			}
-		});
-		return isValid;
+		var seatsValid = this.rowersConfig.isValid();
+		return isValid && seatsValid;
 	}
 
 	/** @returns {number} */

@@ -1,4 +1,3 @@
-import { app } from "../scripts.js";
 import { DEFAULT_SEAT } from "../data/values.js";
 
 const component = "r-seat";
@@ -60,9 +59,14 @@ customElements.define(
 			return `Bancada ${position}`;
 		}
 
+		/** @returns {Seat} */
+		get config() {
+			return this.#seat;
+		}
+
 		/** @param {Seat} value */
-		set seat(value) {
-			this.#seat = value;
+		set config(value) {
+			this.#seat = { ...value };
 			this.#init();
 		}
 
@@ -74,6 +78,7 @@ customElements.define(
 
 		connectedCallback() {
 			this.form = this.shadowRoot.querySelector("form");
+			this.formHeader = this.shadowRoot.querySelector(".form-header");
 			this.arrow = this.shadowRoot.querySelector(".arrow");
 			this.nameSpan = this.shadowRoot.querySelector("#name");
 
@@ -84,9 +89,9 @@ customElements.define(
 
 			this.#init();
 
-			this.form.addEventListener("change", () => this.onChange());
+			this.form.addEventListener("change", () => this.#onChange());
 
-			this.shadowRoot.querySelector(".form-header").addEventListener("click", () => {
+			this.formHeader.addEventListener("click", () => {
 				if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
 					this.form.style.display = "block";
 					this.arrow.style.transform = "rotate(180deg)";
@@ -113,7 +118,7 @@ customElements.define(
 			};
 		}
 
-		onChange() {
+		#onChange() {
 			this.#clearErrors();
 
 			this.#seat.weight = parseInt(this.weightInput.value);
@@ -123,13 +128,13 @@ customElements.define(
 
 			this.nameSpan.textContent = this.name;
 
-			if (this.isValid()) {
-				app.onChangeSeat(this.index, this.#seat);
-			}
+			this.isValid();
 		}
 
 		#clearErrors() {
 			Object.values(this.errors).forEach((error) => (error.textContent = ""));
+			this.formHeader.classList.toggle("error", false);
+			this.arrow.classList.toggle("error", false);
 		}
 
 		/** @returns {bool} */
@@ -143,7 +148,7 @@ customElements.define(
 				this.errors.benchDistance.textContent = "La distancia de la bancada debe estar entre 500 y 900 mm";
 				isValid = false;
 			}
-			this.shadowRoot.querySelector(".form-header").classList.toggle("error", !isValid);
+			this.formHeader.classList.toggle("error", !isValid);
 			this.arrow.classList.toggle("error", !isValid);
 			return isValid;
 		}

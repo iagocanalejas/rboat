@@ -2,6 +2,8 @@
 
 Boat levels calculator using only native web technologies.
 
+[THE SITE](https://iagocanalejas.github.io/rboat/)
+
 # Run
 
 In the root of the folder run the following commands

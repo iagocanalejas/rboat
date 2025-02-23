@@ -1,4 +1,31 @@
 /**
+ * @typedef {Object} BoatConfigElement
+ * @property {BoatConfig} config
+ * @property {string} boatType
+ * @property {function():bool} isValid
+ */
+
+/**
+ * @typedef {Object} RowersConfigElement
+ * @property {Seat[]} config
+ * @property {string} boatType
+ * @property {function(number):void} changeSeats
+ * @property {function():bool} isValid
+ */
+
+/**
+ * @typedef {Object} ResultsElement
+ * @property {BoatResult} result
+ * @property {function():bool} isValid
+ */
+
+/**
+ * @typedef {Object} SeatConfigElement
+ * @property {Seat} config
+ * @property {function():bool} isValid
+ */
+
+/**
  * @typedef {Object} BoatConfig
  * @property {number} length
  * @property {number} bowFloatingLine

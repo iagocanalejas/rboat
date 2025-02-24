@@ -81,6 +81,11 @@ customElements.define(
         /** @type {BoatResult} */
         #result = undefined;
 
+        /** @type {BoatResult} */
+        get result() {
+            return this.#result;
+        }
+
         /** @param {BoatResult} value */
         set result(value) {
             this.#result = value;

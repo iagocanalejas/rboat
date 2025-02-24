@@ -1,4 +1,3 @@
-import { app } from "../scripts.js";
 import { DEFAULT_BOAT } from "../data/values.js";
 
 const component = "r-boat-config";
@@ -58,158 +57,160 @@ template.innerHTML = `
 `;
 
 customElements.define(
-	component,
-	class extends HTMLElement {
-		/** @type {BoatConfig} */
-		#boat = { ...DEFAULT_BOAT };
-		#_boatType = "Batel";
+    component,
+    class extends HTMLElement {
+        /** @type {BoatConfig} */
+        #boat = { ...DEFAULT_BOAT };
+        #boatType = "Batel";
 
-		/** @param {BoatConfig} boat */
-		set boat(boat) {
-			this.#boat = boat;
-			this.#init();
-		}
+        /** @returns {BoatConfig} */
+        get config() {
+            return this.#boat;
+        }
 
-		/** @param {string} value */
-		set boatType(value) {
-			this.#clearErrors();
-			this.#_boatType = value;
-			this.boatNameSpan.textContent = value;
-		}
+        /** @param {BoatConfig} boat */
+        set config(boat) {
+            this.#boat = { ...boat };
+            this.#init();
+        }
 
-		constructor() {
-			super();
-			const root = this.attachShadow({ mode: "open" });
-			root.append(template.content.cloneNode(true));
-		}
+        /** @param {string} value */
+        set boatType(value) {
+            this.#clearErrors();
+            this.#boatType = value;
+            this.boatNameSpan.textContent = value;
+        }
 
-		connectedCallback() {
-			this.form = this.shadowRoot.querySelector("#boat-form");
-			this.formHeader = this.shadowRoot.querySelector(".form-header");
-			this.arrow = this.shadowRoot.querySelector(".arrow");
-			this.boatNameSpan = this.shadowRoot.querySelector("#boat-name");
+        constructor() {
+            super();
+            const root = this.attachShadow({ mode: "open" });
+            root.append(template.content.cloneNode(true));
+        }
 
-			this.lengthInput = this.shadowRoot.querySelector("#length");
-			this.bowInput = this.shadowRoot.querySelector("#bow");
-			this.sternInput = this.shadowRoot.querySelector("#stern");
-			this.weightInput = this.shadowRoot.querySelector("#weight");
-			this.ballastInput = this.shadowRoot.querySelector("#ballast");
-			this.ballastPositionInput = this.shadowRoot.querySelector("#ballast-position");
-			this.ribsInput = this.shadowRoot.querySelector("#ribs");
-			this.rowlocksInput = this.shadowRoot.querySelector("#rowlocks");
-			this.rowlockGapInput = this.shadowRoot.querySelector("#rowlock-gap");
+        connectedCallback() {
+            this.form = this.shadowRoot.querySelector("#boat-form");
+            this.formHeader = this.shadowRoot.querySelector(".form-header");
+            this.arrow = this.shadowRoot.querySelector(".arrow");
+            this.boatNameSpan = this.shadowRoot.querySelector("#boat-name");
 
-			this.#init();
+            this.lengthInput = this.shadowRoot.querySelector("#length");
+            this.bowInput = this.shadowRoot.querySelector("#bow");
+            this.sternInput = this.shadowRoot.querySelector("#stern");
+            this.weightInput = this.shadowRoot.querySelector("#weight");
+            this.ballastInput = this.shadowRoot.querySelector("#ballast");
+            this.ballastPositionInput = this.shadowRoot.querySelector("#ballast-position");
+            this.ribsInput = this.shadowRoot.querySelector("#ribs");
+            this.rowlocksInput = this.shadowRoot.querySelector("#rowlocks");
+            this.rowlockGapInput = this.shadowRoot.querySelector("#rowlock-gap");
 
-			this.form.addEventListener("change", () => this.onChange());
+            this.#init();
 
-			this.formHeader.addEventListener("click", () => {
-				if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
-					this.form.style.display = "block";
-					this.arrow.style.transform = "rotate(180deg)";
-				} else {
-					this.form.style.display = "none";
-					this.arrow.style.transform = "rotate(0deg)";
-				}
-			});
-		}
+            this.form.addEventListener("change", () => this.#onChange());
 
-		#init() {
-			this.lengthInput.value = this.#boat.length;
-			this.bowInput.value = this.#boat.bowFloatingLine;
-			this.sternInput.value = this.#boat.sternFloatingLine;
-			this.weightInput.value = this.#boat.weight;
-			this.ballastInput.value = this.#boat.ballast;
-			this.ballastPositionInput.value = this.#boat.ballastPosition;
-			this.ribsInput.value = this.#boat.ribs.join(", ");
-			this.rowlocksInput.value = this.#boat.rowlocks.join(", ");
-			this.rowlockGapInput.value = this.#boat.rowlockGap;
+            this.formHeader.addEventListener("click", () => {
+                if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
+                    this.form.style.display = "block";
+                    this.arrow.style.transform = "rotate(180deg)";
+                } else {
+                    this.form.style.display = "none";
+                    this.arrow.style.transform = "rotate(0deg)";
+                }
+            });
+        }
 
-			this.form.style.display = "none";
+        isValid() {
+            var isValid = true;
+            if (!this.#boat.weight || this.#boat.weight < 50 || this.#boat.weight > 300) {
+                this.errors.weight.textContent = "El peso debe estar entre 50 y 300 kg";
+                isValid = false;
+            }
+            if (!this.#boat.length || this.#boat.length < 6000 || this.#boat.length > 15000) {
+                this.errors.length.textContent = "La distancia de la bancada debe estar entre 6000 y 15000 mm";
+                isValid = false;
+            }
+            if (!this.#boat.rowlockGap || this.#boat.rowlockGap < 10 || this.#boat.rowlockGap > 100) {
+                this.errors.rowlockGap.textContent = "La separación entre toletes debe estar entre 50 y 150 mm";
+                isValid = false;
+            }
 
-			this.errors = {
-				length: this.shadowRoot.querySelector("#length-error"),
-				weight: this.shadowRoot.querySelector("#weight-error"),
-				ribs: this.shadowRoot.querySelector("#ribs-error"),
-				rowlocks: this.shadowRoot.querySelector("#rowlocks-error"),
-				rowlockGap: this.shadowRoot.querySelector("#rowlock-gap-error"),
-			};
-		}
+            if (this.#boatType.toUpperCase() === "BATEL") {
+                if (!this.#boat.ribs || this.#boat.ribs.length !== 5) {
+                    this.errors.ribs.textContent = "Los bateles tienen 5 cuadernas";
+                    isValid = false;
+                }
+                if (!this.#boat.rowlocks || this.#boat.rowlocks.length !== 4) {
+                    this.errors.rowlocks.textContent = "Los bateles tienen 4 toletes";
+                    isValid = false;
+                }
+            }
+            if (this.#boatType.toUpperCase() === "TRAINERILLA") {
+                if (!this.#boat.ribs || this.#boat.ribs.length !== 7) {
+                    this.errors.ribs.textContent = "Las trainerillas tienen 7 cuadernas";
+                    isValid = false;
+                }
+                if (!this.#boat.rowlocks || this.#boat.rowlocks.length !== 6) {
+                    this.errors.rowlocks.textContent = "Las trainerillas tienen 6 toletes";
+                    isValid = false;
+                }
+            }
+            if (this.#boatType.toUpperCase() === "TRAINERA") {
+                if (!this.#boat.ribs || this.#boat.ribs.length !== 8) {
+                    this.errors.ribs.textContent = "Las traineras tienen 8 cuadernas";
+                    isValid = false;
+                }
+                if (!this.#boat.rowlocks || this.#boat.rowlocks.length !== 7) {
+                    this.errors.rowlocks.textContent = "Las traineras tienen 7 toletes";
+                    isValid = false;
+                }
+            }
 
-		onChange() {
-			this.#clearErrors();
+            this.formHeader.classList.toggle("error", !isValid);
+            this.arrow.classList.toggle("error", !isValid);
+            return isValid;
+        }
 
-			this.#boat.length = parseInt(this.lengthInput.value);
-			this.#boat.bowFloatingLine = parseInt(this.bowInput.value);
-			this.#boat.sternFloatingLine = parseInt(this.sternInput.value);
-			this.#boat.weight = parseInt(this.weightInput.value);
-			this.#boat.ballast = parseFloat(this.ballastInput.value);
-			this.#boat.ballastPosition = parseInt(this.ballastPositionInput.value);
-			this.#boat.ribs = this.ribsInput.value.split(",").map((num) => parseInt(num.trim()));
-			this.#boat.rowlocks = this.rowlocksInput.value.split(",").map((num) => parseInt(num.trim()));
-			this.#boat.rowlockGap = parseInt(this.rowlockGapInput.value);
+        #init() {
+            this.lengthInput.value = this.#boat.length;
+            this.bowInput.value = this.#boat.bowFloatingLine;
+            this.sternInput.value = this.#boat.sternFloatingLine;
+            this.weightInput.value = this.#boat.weight;
+            this.ballastInput.value = this.#boat.ballast;
+            this.ballastPositionInput.value = this.#boat.ballastPosition;
+            this.ribsInput.value = this.#boat.ribs.join(", ");
+            this.rowlocksInput.value = this.#boat.rowlocks.join(", ");
+            this.rowlockGapInput.value = this.#boat.rowlockGap;
 
-			if (this.isValid()) {
-				app.onChange(this.#boat);
-			}
-		}
+            this.form.style.display = "none";
 
-		#clearErrors() {
-			Object.values(this.errors).forEach((error) => (error.textContent = ""));
-			this.formHeader.classList.toggle("error", false);
-			this.arrow.classList.toggle("error", false);
-		}
+            this.errors = {
+                length: this.shadowRoot.querySelector("#length-error"),
+                weight: this.shadowRoot.querySelector("#weight-error"),
+                ribs: this.shadowRoot.querySelector("#ribs-error"),
+                rowlocks: this.shadowRoot.querySelector("#rowlocks-error"),
+                rowlockGap: this.shadowRoot.querySelector("#rowlock-gap-error"),
+            };
+        }
 
-		/** @returns {bool} */
-		isValid() {
-			var isValid = true;
-			if (!this.#boat.weight || this.#boat.weight < 50 || this.#boat.weight > 300) {
-				this.errors.weight.textContent = "El peso debe estar entre 50 y 300 kg";
-				isValid = false;
-			}
-			if (!this.#boat.length || this.#boat.length < 6000 || this.#boat.length > 15000) {
-				this.errors.length.textContent = "La distancia de la bancada debe estar entre 6000 y 15000 mm";
-				isValid = false;
-			}
-			if (!this.#boat.rowlockGap || this.#boat.rowlockGap < 10 || this.#boat.rowlockGap > 100) {
-				this.errors.rowlockGap.textContent = "La separación entre toletes debe estar entre 50 y 150 mm";
-				isValid = false;
-			}
+        #onChange() {
+            this.#clearErrors();
 
-			if (this.#_boatType.toUpperCase() === "BATEL") {
-				if (!this.#boat.ribs || this.#boat.ribs.length !== 5) {
-					this.errors.ribs.textContent = "Los bateles tienen 5 cuadernas";
-					isValid = false;
-				}
-				if (!this.#boat.rowlocks || this.#boat.rowlocks.length !== 4) {
-					this.errors.rowlocks.textContent = "Los bateles tienen 4 toletes";
-					isValid = false;
-				}
-			}
-			if (this.#_boatType.toUpperCase() === "TRAINERILLA") {
-				if (!this.#boat.ribs || this.#boat.ribs.length !== 7) {
-					this.errors.ribs.textContent = "Las trainerillas tienen 7 cuadernas";
-					isValid = false;
-				}
-				if (!this.#boat.rowlocks || this.#boat.rowlocks.length !== 6) {
-					this.errors.rowlocks.textContent = "Las trainerillas tienen 6 toletes";
-					isValid = false;
-				}
-			}
-			if (this.#_boatType.toUpperCase() === "TRAINERA") {
-				if (!this.#boat.ribs || this.#boat.ribs.length !== 8) {
-					this.errors.ribs.textContent = "Las traineras tienen 8 cuadernas";
-					isValid = false;
-				}
-				if (!this.#boat.rowlocks || this.#boat.rowlocks.length !== 7) {
-					this.errors.rowlocks.textContent = "Las traineras tienen 7 toletes";
-					isValid = false;
-				}
-			}
+            this.#boat.length = parseInt(this.lengthInput.value);
+            this.#boat.bowFloatingLine = parseInt(this.bowInput.value);
+            this.#boat.sternFloatingLine = parseInt(this.sternInput.value);
+            this.#boat.weight = parseInt(this.weightInput.value);
+            this.#boat.ballast = parseFloat(this.ballastInput.value);
+            this.#boat.ballastPosition = parseInt(this.ballastPositionInput.value);
+            this.#boat.ribs = this.ribsInput.value.split(",").map((num) => parseInt(num.trim()));
+            this.#boat.rowlocks = this.rowlocksInput.value.split(",").map((num) => parseInt(num.trim()));
+            this.#boat.rowlockGap = parseInt(this.rowlockGapInput.value);
 
-			this.formHeader.classList.toggle("error", !isValid);
-			this.arrow.classList.toggle("error", !isValid);
-			return isValid;
-		}
-	},
+            this.isValid();
+        }
+
+        #clearErrors() {
+            Object.values(this.errors).forEach((error) => (error.textContent = ""));
+            this.formHeader.classList.toggle("error", false);
+            this.arrow.classList.toggle("error", false);
+        }
+    },
 );

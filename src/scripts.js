@@ -2,155 +2,108 @@ import "./data/types.js";
 import "./components/boat.js";
 import "./components/rowers.js";
 import "./components/results.js";
-
-import { DEFAULT_BOAT } from "./data/values.js";
+import { computeRatio, computeCenterOfGravity } from "./data/compute.js";
 
 class App {
-	/** @type {BoatConfig} */
-	#boat = { ...DEFAULT_BOAT };
-	/** @type {Seat[]} */
-	#seats = [];
-	/** @type {BoatResult} */
-	#result = undefined;
+    /** @type {BoatConfigElement} */
+    boat;
+    /** @type {RowersConfigElement} */
+    seats;
+    /** @type {ResultsElement} */
+    results;
+    /** @type {HTMLElement[]} */
+    boatLinks;
 
-	constructor() {
-		this.resultConfig = document.querySelector("r-results");
-		this.boatConfig = document.querySelector("r-boat-config");
-		this.rowersConfig = document.querySelector("r-rowers-config");
-		this.rowersConfig.numSeats = 4;
+    constructor() {
+        this.boat = document.querySelector("r-boat-config");
+        this.seats = document.querySelector("r-rowers-config");
+        this.results = document.querySelector("r-results");
 
-		document.querySelector("#input-upload").addEventListener("change", (e) => this.#upload(e));
+        document.querySelector("#input-upload").addEventListener("change", (e) => this.#upload(e));
 
-		this.boatLinks = [
-			document.querySelector("#link-batel"),
-			document.querySelector("#link-trainerilla"),
-			document.querySelector("#link-trainera"),
-		];
-		this.boatLinks.forEach((link) =>
-			link.addEventListener("click", (e) => this.#onNavItemClick(e, link, parseInt(link.getAttribute("seats")))),
-		);
-	}
+        this.boatLinks = [
+            document.querySelector("#link-batel"),
+            document.querySelector("#link-trainerilla"),
+            document.querySelector("#link-trainera"),
+        ];
+        this.boatLinks.forEach((link) =>
+            link.addEventListener("click", (e) => this.#onNavItemClick(e, link, parseInt(link.getAttribute("seats")))),
+        );
+    }
 
-	/** @param {BoatConfig} boat */
-	onChange(boat) {
-		console.log("Configuring boat...");
-		this.#boat = boat;
-	}
+    calculate() {
+        if (!this.#isValid()) return;
+        console.log("Calculating...");
 
-	/**
-	 * @param {number} index
-	 * @param {Seat} seat
-	 */
-	onChangeSeat(index, seat) {
-		console.log(`Configuring seat ${index}...`);
-		this.#seats[index] = seat;
-	}
+        this.results.result = {
+            ratio: computeRatio(this.boat.config, this.seats.config),
+            centerOfGravity: computeCenterOfGravity(this.boat.config, this.seats.config),
+        };
+    }
 
-	calculate() {
-		if (!this.#isValid()) return;
-		console.log("Calculating...");
+    save() {
+        if (!this.results.result) return;
+        console.log("Saving file...");
 
-		this.#result = {
-			ratio: this.#computeRatio(),
-			centerOfGravity: this.#computeCenterOfGravity(),
-		};
-		this.resultConfig.result = this.#result;
-	}
+        const data = {
+            boat: this.boat.config,
+            seats: this.seats.config,
+            result: this.results.result,
+        };
 
-	save() {
-		if (!this.#result) return;
-		console.log("Saving file...");
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 4)], { type: "application/json" }));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "boat.json";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
 
-		const data = {
-			boat: this.#boat,
-			seats: this.#seats,
-			result: this.#result,
-		};
+    /** @param {Event} event */
+    async #upload(event) {
+        console.log("Uploading file...");
+        const file = event.target.files[0];
+        if (!file) return;
 
-		const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 4)], { type: "application/json" }));
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = "boat.json";
-		a.click();
-		URL.revokeObjectURL(url);
-	}
+        const text = await file.text();
+        const data = JSON.parse(text);
 
-	/** @param {Event} event */
-	async #upload(event) {
-		console.log("Uploading file...");
-		const file = event.target.files[0];
-		if (!file) return;
+        this.boat.config = data.boat;
+        this.seats.config = data.seats;
+        this.results.result = data.result;
 
-		const text = await file.text();
-		const data = JSON.parse(text);
+        var linkConfig;
+        if (this.seats.config.length === 5) {
+            linkConfig = this.boatLinks[0];
+        } else if (this.seats.config.length === 7) {
+            linkConfig = this.boatLinks[1];
+        } else {
+            linkConfig = this.boatLinks[2];
+        }
+        this.boat.boatType = linkConfig.textContent;
+        this.boatLinks.forEach((link) => link.classList.toggle("active", link === linkConfig));
+    }
 
-		this.#boat = data.boat;
-		this.#seats = data.seats;
-		this.#result = data.result;
+    /**
+     * @param {MouseEvent} event
+     * @param {HTMLElement} clickedLink
+     * @param {number} numSeats
+     */
+    #onNavItemClick(event, clickedLink, numSeats) {
+        event.preventDefault();
 
-		this.boatConfig.boat = this.#boat;
-		this.resultConfig.result = this.#result;
+        this.boat.boatType = clickedLink.textContent;
+        this.seats.changeSeats(numSeats + 1);
 
-		if (this.#seats.length === 5) {
-			this.boatLinks[0].click();
-		} else if (this.#seats.length === 7) {
-			this.boatLinks[1].click();
-		} else {
-			this.boatLinks[2].click();
-		}
-		this.rowersConfig.seats = this.#seats;
-	}
+        this.boatLinks.forEach((link) => link.classList.toggle("active", link === clickedLink));
+    }
 
-	/**
-	 * @param {MouseEvent} event
-	 * @param {HTMLElement} clickedLink
-	 * @param {number} numSeats
-	 */
-	#onNavItemClick(event, clickedLink, numSeats) {
-		event.preventDefault();
-
-		this.boatConfig.boatType = clickedLink.textContent;
-		this.rowersConfig.numSeats = numSeats;
-		this.boatLinks.forEach((link) => link.classList.toggle("active", link === clickedLink));
-	}
-
-	/** @returns {bool} */
-	#isValid() {
-		var isValid = this.boatConfig.isValid();
-		var seatsValid = this.rowersConfig.isValid();
-		return isValid && seatsValid;
-	}
-
-	/** @returns {number} */
-	#computeRatio() {
-		const midpoint = this.#boat.length / 2;
-		const ballastInfluence = this.#boat.ballast * (midpoint - this.#boat.ballastPosition);
-		const computeInfluence = (sum, seat, idx) => sum + (midpoint - this.#weightPositionFromBow(idx)) * seat.weight;
-		return (this.#seats.reduce(computeInfluence, 0) + ballastInfluence) / 1000;
-	}
-
-	/** @returns {number} */
-	#computeCenterOfGravity() {
-		const totalWeight =
-			this.#seats.reduce((sum, seat) => sum + seat.weight, 0) + this.#boat.weight + this.#boat.ballast;
-
-		const computeMoment = (sum, seat, idx) => sum + this.#weightPositionFromBow(idx) * seat.weight;
-		const totalMoment = this.#seats.reduce(computeMoment, 0) + this.#boat.ballastPosition * this.#boat.ballast;
-
-		return totalMoment / totalWeight;
-	}
-
-	/** @param {number} position
-	 * @returns {number}
-	 * */
-	#weightPositionFromBow(position) {
-		if (position === 0) {
-			return this.#boat.ribs[position] + this.#seats[position].benchDistance;
-		}
-		const rowlockHole = this.#seats[position].rowlockHole * this.#boat.rowlockGap;
-		const rowlockPosition = this.#boat.ribs[position] + this.#boat.rowlocks[position - 1] + rowlockHole;
-		return rowlockPosition - this.#seats[position].benchDistance;
-	}
+    /** @returns {bool} */
+    #isValid() {
+        var isValid = this.boat.isValid();
+        var seatsValid = this.seats.isValid();
+        return isValid && seatsValid;
+    }
 }
 
 const app = new App();

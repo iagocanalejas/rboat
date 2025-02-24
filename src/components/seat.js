@@ -1,4 +1,3 @@
-import { app } from "../scripts.js";
 import { DEFAULT_SEAT } from "../data/values.js";
 
 const component = "r-seat";
@@ -38,117 +37,120 @@ template.innerHTML = `
 `;
 
 customElements.define(
-    component,
-    class extends HTMLElement {
-        /** @type {Seat} */
-        #seat = DEFAULT_SEAT;
+	component,
+	class extends HTMLElement {
+		/** @type {Seat} */
+		#seat = DEFAULT_SEAT;
 
-        /** @returns {number} */
-        get index() {
-            return parseInt(this.getAttribute("id").replace("seat-", "")) || 0;
-        }
+		/** @returns {number} */
+		get index() {
+			return parseInt(this.getAttribute("id").replace("seat-", "")) || 0;
+		}
 
-        /** @returns {string} */
-        get name() {
-            const position = this.getAttribute("position");
-            if (position === "COXWAIN") {
-                return "Timonel";
-            }
-            if (this.#seat.side) {
-                return `Bancada ${position} - ${this.#seat.side === "STARBOARD" ? "Estribor" : "Babor"}`;
-            }
-            return `Bancada ${position}`;
-        }
+		/** @returns {string} */
+		get name() {
+			const position = this.getAttribute("position");
+			if (position === "COXWAIN") {
+				return "Timonel";
+			}
+			if (this.#seat.side) {
+				return `Bancada ${position} - ${this.#seat.side === "STARBOARD" ? "Estribor" : "Babor"}`;
+			}
+			return `Bancada ${position}`;
+		}
 
-        /** @param {Seat} value */
-        set seat(value) {
-            this.#seat = value;
-            this.#init();
-        }
+		/** @returns {Seat} */
+		get config() {
+			return this.#seat;
+		}
 
-        constructor() {
-            super();
-            const root = this.attachShadow({ mode: "open" });
-            root.append(template.content.cloneNode(true));
-        }
+		/** @param {Seat} value */
+		set config(value) {
+			this.#seat = { ...value };
+			this.#init();
+		}
 
-        connectedCallback() {
-            this.form = this.shadowRoot.querySelector("form");
-            this.formHeader = this.shadowRoot.querySelector(".form-header");
-            this.arrow = this.shadowRoot.querySelector(".arrow");
-            this.nameSpan = this.shadowRoot.querySelector("#name");
+		constructor() {
+			super();
+			const root = this.attachShadow({ mode: "open" });
+			root.append(template.content.cloneNode(true));
+		}
 
-            this.weightInput = this.shadowRoot.querySelector("#weight");
-            this.benchDistanceInput = this.shadowRoot.querySelector("#bench-distance");
-            this.rowlockHoleInput = this.shadowRoot.querySelector("#rowlock-hole");
-            this.sideInput = this.shadowRoot.querySelector("#side");
+		connectedCallback() {
+			this.form = this.shadowRoot.querySelector("form");
+			this.formHeader = this.shadowRoot.querySelector(".form-header");
+			this.arrow = this.shadowRoot.querySelector(".arrow");
+			this.nameSpan = this.shadowRoot.querySelector("#name");
 
-            this.#init();
+			this.weightInput = this.shadowRoot.querySelector("#weight");
+			this.benchDistanceInput = this.shadowRoot.querySelector("#bench-distance");
+			this.rowlockHoleInput = this.shadowRoot.querySelector("#rowlock-hole");
+			this.sideInput = this.shadowRoot.querySelector("#side");
 
-            this.form.addEventListener("change", () => this.onChange());
+			this.#init();
 
-            this.formHeader.addEventListener("click", () => {
-                if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
-                    this.form.style.display = "block";
-                    this.arrow.style.transform = "rotate(180deg)";
-                } else {
-                    this.form.style.display = "none";
-                    this.arrow.style.transform = "rotate(0deg)";
-                }
-            });
-        }
+			this.form.addEventListener("change", () => this.#onChange());
 
-        #init() {
-            this.nameSpan.textContent = this.name;
+			this.formHeader.addEventListener("click", () => {
+				if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
+					this.form.style.display = "block";
+					this.arrow.style.transform = "rotate(180deg)";
+				} else {
+					this.form.style.display = "none";
+					this.arrow.style.transform = "rotate(0deg)";
+				}
+			});
+		}
 
-            this.weightInput.value = this.#seat.weight;
-            this.rowlockHoleInput.value = this.#seat.rowlockHole;
-            this.benchDistanceInput.value = this.#seat.benchDistance;
-            this.sideInput.value = this.#seat.side;
+		#init() {
+			this.nameSpan.textContent = this.name;
 
-            this.form.style.display = "none";
+			this.weightInput.value = this.#seat.weight;
+			this.rowlockHoleInput.value = this.#seat.rowlockHole;
+			this.benchDistanceInput.value = this.#seat.benchDistance;
+			this.sideInput.value = this.#seat.side;
 
-            this.errors = {
-                weight: this.shadowRoot.querySelector("#weight-error"),
-                benchDistance: this.shadowRoot.querySelector("#bench-distance-error"),
-            };
-        }
+			this.form.style.display = "none";
 
-        onChange() {
-            this.#clearErrors();
+			this.errors = {
+				weight: this.shadowRoot.querySelector("#weight-error"),
+				benchDistance: this.shadowRoot.querySelector("#bench-distance-error"),
+			};
+		}
 
-            this.#seat.weight = parseInt(this.weightInput.value);
-            this.#seat.rowlockHole = parseInt(this.rowlockHoleInput.value);
-            this.#seat.benchDistance = parseInt(this.benchDistanceInput.value);
-            this.#seat.side = this.sideInput.value;
+		#onChange() {
+			this.#clearErrors();
 
-            this.nameSpan.textContent = this.name;
+			this.#seat.weight = parseInt(this.weightInput.value);
+			this.#seat.rowlockHole = parseInt(this.rowlockHoleInput.value);
+			this.#seat.benchDistance = parseInt(this.benchDistanceInput.value);
+			this.#seat.side = this.sideInput.value;
 
-            if (this.isValid()) {
-                app.onChangeSeat(this.index, this.#seat);
-            }
-        }
+			this.nameSpan.textContent = this.name;
 
-        #clearErrors() {
-            Object.values(this.errors).forEach((error) => (error.textContent = ""));
-            this.formHeader.classList.toggle("error", false);
-            this.arrow.classList.toggle("error", false);
-        }
+			this.isValid();
+		}
 
-        /** @returns {bool} */
-        isValid() {
-            var isValid = true;
-            if (!this.#seat.weight || this.#seat.weight < 0 || this.#seat.weight > 200) {
-                this.errors.weight.textContent = "El peso debe estar entre 0 y 200 kg";
-                isValid = false;
-            }
-            if (!this.#seat.benchDistance || this.#seat.benchDistance < 500 || this.#seat.benchDistance > 900) {
-                this.errors.benchDistance.textContent = "La distancia de la bancada debe estar entre 500 y 900 mm";
-                isValid = false;
-            }
-            this.formHeader.classList.toggle("error", !isValid);
-            this.arrow.classList.toggle("error", !isValid);
-            return isValid;
-        }
-    },
+		#clearErrors() {
+			Object.values(this.errors).forEach((error) => (error.textContent = ""));
+			this.formHeader.classList.toggle("error", false);
+			this.arrow.classList.toggle("error", false);
+		}
+
+		/** @returns {bool} */
+		isValid() {
+			var isValid = true;
+			if (!this.#seat.weight || this.#seat.weight < 0 || this.#seat.weight > 200) {
+				this.errors.weight.textContent = "El peso debe estar entre 0 y 200 kg";
+				isValid = false;
+			}
+			if (!this.#seat.benchDistance || this.#seat.benchDistance < 500 || this.#seat.benchDistance > 900) {
+				this.errors.benchDistance.textContent = "La distancia de la bancada debe estar entre 500 y 900 mm";
+				isValid = false;
+			}
+			this.formHeader.classList.toggle("error", !isValid);
+			this.arrow.classList.toggle("error", !isValid);
+			return isValid;
+		}
+	},
 );

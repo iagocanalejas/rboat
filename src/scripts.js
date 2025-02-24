@@ -1,6 +1,7 @@
 import "./data/types.js";
 import "./components/boat.js";
 import "./components/rowers.js";
+import "./components/results.js";
 
 import { DEFAULT_BOAT } from "./data/values.js";
 
@@ -12,22 +13,12 @@ class App {
 	/** @type {BoatResult} */
 	#result = undefined;
 
-	/** @param {BoatResult} value */
-	set result(value) {
-		this.#result = value;
-		if (!this.#result) return;
-
-		document.querySelector("#ratio-result").textContent = this.#result.ratio.toFixed(2);
-		document.querySelector("#gravity-center-result").textContent = this.#result.centerOfGravity.toFixed(2);
-	}
-
 	constructor() {
+		this.resultConfig = document.querySelector("r-results");
 		this.boatConfig = document.querySelector("r-boat-config");
 		this.rowersConfig = document.querySelector("r-rowers-config");
 		this.rowersConfig.numSeats = 4;
 
-		document.querySelector("#calculate").addEventListener("click", () => this.#calculate());
-		document.querySelector("#save").addEventListener("click", () => this.#save());
 		document.querySelector("#input-upload").addEventListener("change", (e) => this.#upload(e));
 
 		this.boatLinks = [
@@ -55,17 +46,18 @@ class App {
 		this.#seats[index] = seat;
 	}
 
-	#calculate() {
+	calculate() {
 		if (!this.#isValid()) return;
 		console.log("Calculating...");
 
-		this.result = {
+		this.#result = {
 			ratio: this.#computeRatio(),
 			centerOfGravity: this.#computeCenterOfGravity(),
 		};
+		this.resultConfig.result = this.#result;
 	}
 
-	#save() {
+	save() {
 		if (!this.#result) return;
 		console.log("Saving file...");
 
@@ -96,7 +88,8 @@ class App {
 		this.#seats = data.seats;
 		this.#result = data.result;
 
-		document.querySelector("r-boat-config").boat = this.#boat;
+		this.boatConfig.boat = this.#boat;
+		this.resultConfig.result = this.#result;
 
 		if (this.#seats.length === 5) {
 			this.boatLinks[0].click();

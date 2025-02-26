@@ -8,9 +8,9 @@ import "./types.js";
  * */
 function computeRatio(boat, seats) {
     const midpoint = boat.length / 2;
-    const ballastInfluence = boat.ballast * (midpoint - boat.ballastPosition);
+    const ballastInfluence = boat.ballast * (midpoint - boat.ballastPosition) || 0;
     const computeInfluence = (sum, seat, idx) =>
-        sum + (midpoint - weightPositionFromBow(boat, seats[idx], idx)) * seat.weight;
+        sum + (midpoint - weightPositionFromBow(boat, seat, idx)) * seat.weight;
     return (seats.reduce(computeInfluence, 0) + ballastInfluence) / 1000;
 }
 
@@ -23,7 +23,7 @@ function computeRatio(boat, seats) {
 function computeCenterOfGravity(boat, seats) {
     const totalWeight = seats.reduce((sum, seat) => sum + seat.weight, 0) + boat.weight + boat.ballast;
 
-    const computeMoment = (sum, seat, idx) => sum + weightPositionFromBow(boat, seats[idx], idx) * seat.weight;
+    const computeMoment = (sum, seat, idx) => sum + weightPositionFromBow(boat, seat, idx) * seat.weight;
     const totalMoment = seats.reduce(computeMoment, 0) + boat.ballastPosition * boat.ballast;
 
     return totalMoment / totalWeight;

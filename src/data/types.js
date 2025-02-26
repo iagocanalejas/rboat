@@ -36,6 +36,7 @@
  * @property {number[]} ribs
  * @property {number[]} rowlocks
  * @property {number} rowlockGap
+ * @property {number[]} sweetSpot
  */
 
 /**

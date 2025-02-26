@@ -80,6 +80,8 @@ customElements.define(
     class extends HTMLElement {
         /** @type {BoatResult} */
         #result = undefined;
+        /** {number[]} */
+        #sweetSpot = undefined;
 
         /** @type {BoatResult} */
         get result() {
@@ -93,6 +95,21 @@ customElements.define(
 
             this.ratioResult.textContent = this.#result.ratio.toFixed(2);
             this.gravityCenterResult.textContent = this.#result.centerOfGravity.toFixed(2);
+
+            if (this.#sweetSpot && this.#result.ratio > this.#sweetSpot[0] && this.#result.ratio < this.#sweetSpot[1]) {
+                this.gravityCenterResult.style.color = "green";
+                this.ratioResult.style.color = "green";
+            }
+        }
+
+        /** @param {number[]} value */
+        set sweetSpot(value) {
+            this.#sweetSpot = undefined;
+            this.gravityCenterResult.style.color = "";
+            this.ratioResult.style.color = "";
+            if (value && value.length === 2) {
+                this.#sweetSpot = value;
+            }
         }
 
         constructor() {

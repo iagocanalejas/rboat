@@ -1,0 +1,26 @@
+{
+	"length": 7000,
+	"bowFloatingLine": 430,
+	"sternFloatingLine": 410,
+	"weight": 63,
+	"ballast": 0,
+	"ballastPosition": 0,
+	"ribs": [
+		5590,
+		4480,
+		3370,
+		2260,
+		1150
+	],
+	"rowlocks": [
+		700,
+		690,
+		670,
+		620
+	],
+	"rowlockGap": 20,
+	"sweetSpot": [
+		30,
+		35
+	]
+}

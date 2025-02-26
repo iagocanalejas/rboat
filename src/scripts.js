@@ -6,18 +6,18 @@ import { computeRatio, computeCenterOfGravity } from "./data/compute.js";
 
 class App {
     /** @type {BoatConfigElement} */
-    boat;
+    boatElement;
     /** @type {RowersConfigElement} */
-    seats;
+    rowersElement;
     /** @type {ResultsElement} */
-    results;
+    resultsElement;
     /** @type {HTMLElement[]} */
     boatLinks;
 
     constructor() {
-        this.boat = document.querySelector("r-boat-config");
-        this.seats = document.querySelector("r-rowers-config");
-        this.results = document.querySelector("r-results");
+        this.boatElement = document.querySelector("r-boat-config");
+        this.rowersElement = document.querySelector("r-rowers-config");
+        this.resultsElement = document.querySelector("r-results");
 
         document.querySelector("#input-upload").addEventListener("change", (e) => this.#upload(e));
 
@@ -31,24 +31,29 @@ class App {
         );
     }
 
+    /** @param {BoatConfig} value */
+    onChangeSnippet(value) {
+        this.resultsElement.sweetSpot = value.sweetSpot;
+    }
+
     calculate() {
         if (!this.#isValid()) return;
         console.log("Calculating...");
 
-        this.results.result = {
-            ratio: computeRatio(this.boat.config, this.seats.config),
-            centerOfGravity: computeCenterOfGravity(this.boat.config, this.seats.config),
+        this.resultsElement.result = {
+            ratio: computeRatio(this.boatElement.config, this.rowersElement.config),
+            centerOfGravity: computeCenterOfGravity(this.boatElement.config, this.rowersElement.config),
         };
     }
 
     save() {
-        if (!this.results.result) return;
+        if (!this.resultsElement.result) return;
         console.log("Saving file...");
 
         const data = {
-            boat: this.boat.config,
-            seats: this.seats.config,
-            result: this.results.result,
+            boat: this.boatElement.config,
+            seats: this.rowersElement.config,
+            result: this.resultsElement.result,
         };
 
         const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 4)], { type: "application/json" }));
@@ -68,19 +73,20 @@ class App {
         const text = await file.text();
         const data = JSON.parse(text);
 
-        this.boat.config = data.boat;
-        this.seats.config = data.seats;
-        this.results.result = data.result;
+        this.boatElement.config = data.boat;
+        this.rowersElement.config = data.seats;
+        this.resultsElement.sweetSpot = data.boat.sweetSpot;
+        this.resultsElement.result = data.result;
 
         var linkConfig;
-        if (this.seats.config.length === 5) {
+        if (this.rowersElement.config.length === 5) {
             linkConfig = this.boatLinks[0];
-        } else if (this.seats.config.length === 7) {
+        } else if (this.rowersElement.config.length === 7) {
             linkConfig = this.boatLinks[1];
         } else {
             linkConfig = this.boatLinks[2];
         }
-        this.boat.boatType = linkConfig.textContent;
+        this.boatElement.boatType = linkConfig.textContent;
         this.boatLinks.forEach((link) => link.classList.toggle("active", link === linkConfig));
     }
 
@@ -92,16 +98,16 @@ class App {
     #onNavItemClick(event, clickedLink, numSeats) {
         event.preventDefault();
 
-        this.boat.boatType = clickedLink.textContent;
-        this.seats.changeSeats(numSeats + 1);
+        this.boatElement.boatType = clickedLink.textContent;
+        this.rowersElement.changeSeats(numSeats + 1);
 
         this.boatLinks.forEach((link) => link.classList.toggle("active", link === clickedLink));
     }
 
     /** @returns {bool} */
     #isValid() {
-        var isValid = this.boat.isValid();
-        var seatsValid = this.seats.isValid();
+        var isValid = this.boatElement.isValid();
+        var seatsValid = this.rowersElement.isValid();
         return isValid && seatsValid;
     }
 }

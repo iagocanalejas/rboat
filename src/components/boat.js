@@ -1,57 +1,72 @@
 import { DEFAULT_BOAT } from "../data/values.js";
+import { app } from "../scripts.js";
 
 const component = "r-boat-config";
 const template = document.createElement("template");
 
 template.innerHTML = `
+<style>
+#snippets-container {
+	margin: 10px 20px;
+}
+</style>
 <div class="collapsible">
 	<button class="form-header">
 		<span id="boat-name">Batel</span>
 		<span class="arrow">▼</span>
 	</button>
-	<form id="boat-form" style="margin-top: 0">
-		<div>
-			<label for="length">Eslora (mm)</label>
-			<input type="number" id="length" name="length" />
-			<span class="error" id="length-error"></span>
+	<div id="collapsible-content">
+		<div id="snippets-container">
+			<select id="snippets"></select>
 		</div>
-		<div>
-			<label for="bow">Línea de flotación de proa (mm)</label>
-			<input type="number" id="bow" name="bow" />
-		</div>
-		<div>
-			<label for="stern">Línea de flotación de popa (mm)</label>
-			<input type="number" id="stern" name="stern" />
-		</div>
-		<div>
-			<label for="weight">Peso (kg)</label>
-			<input type="number" id="weight" name="weight" />
-			<span class="error" id="weight-error"></span>
-		</div>
-		<div>
-			<label for="ballast">Lastre (kg)</label>
-			<input type="number" step=".01" id="ballast" name="ballast" />
-		</div>
-		<div>
-			<label for="ballast-position">Position lastre (desde proa)</label>
-			<input type="number" id="ballast-position" name="ballast-position" />
-		</div>
-		<div>
-			<label for="ribs">Distancia de las cuadernas (desde proa)</label>
-			<input type="text" id="ribs" name="ribs" />
-			<span class="error" id="ribs-error"></span>
-		</div>
-		<div>
-			<label for="rowlocks">Distancia primer agujero (desde cuaderna proa)</label>
-			<input type="text" id="rowlocks" name="rowlocks" />
-			<span class="error" id="rowlocks-error"></span>
-		</div>
-		<div>
-			<label for="rowlock-gap">Separación entre agujeros (mm)</label>
-			<input type="number" id="rowlock-gap" name="rowlock-gap" />
-			<span class="error" id="rowlock-gap-error"></span>
-		</div>
-	</form>
+		<form id="boat-form" style="margin-top: 0">
+			<div>
+				<label for="length">Eslora (mm)</label>
+				<input type="number" id="length" name="length" placeholder="7000" />
+				<span class="error" id="length-error"></span>
+			</div>
+			<div>
+				<label for="bow">Línea de flotación de proa (mm)</label>
+				<input type="number" id="bow" name="bow" placeholder="400" />
+			</div>
+			<div>
+				<label for="stern">Línea de flotación de popa (mm)</label>
+				<input type="number" id="stern" name="stern" placeholder="420" />
+			</div>
+			<div>
+				<label for="weight">Peso (kg)</label>
+				<input type="number" id="weight" name="weight" placeholder="65" />
+				<span class="error" id="weight-error"></span>
+			</div>
+			<div>
+				<label for="ballast">Lastre (kg)</label>
+				<input type="number" step=".01" id="ballast" name="ballast" placeholder="6" />
+			</div>
+			<div>
+				<label for="ballast-position">Position lastre (desde proa)</label>
+				<input type="number" id="ballast-position" name="ballast-position" placeholder="2000" />
+			</div>
+			<div>
+				<label for="ribs">Distancia de las cuadernas (desde proa)</label>
+				<input type="text" id="ribs" name="ribs" placeholder="5590, 4480, 3370, 2260, 1150"/>
+				<span class="error" id="ribs-error"></span>
+			</div>
+			<div>
+				<label for="rowlocks">Distancia primer agujero (desde cuaderna proa)</label>
+				<input type="text" id="rowlocks" name="rowlocks" placeholder="660, 720, 680, 700"/>
+				<span class="error" id="rowlocks-error"></span>
+			</div>
+			<div>
+				<label for="rowlock-gap">Separación entre agujeros (mm)</label>
+				<input type="number" id="rowlock-gap" name="rowlock-gap" placeholder="20"/>
+				<span class="error" id="rowlock-gap-error"></span>
+			</div>
+			<div>
+				<label for="ratio-sweet-spot">Rango de ratio correcto</label>
+				<input type="text" id="ratio-sweet-spot" name="ratio-sweet-spot" placeholder="30, 35" />
+			</div>
+		</form>
+	</div>
 </div>
 <link rel="stylesheet" href="./src/styles.css">
 `;
@@ -59,6 +74,12 @@ template.innerHTML = `
 customElements.define(
     component,
     class extends HTMLElement {
+        SNIPPETS = {
+            batel: [{ name: "Amilibia Proa Ancha", path: "amilibia_wide_bow.json" }],
+            trainerilla: [],
+            trainera: [],
+        };
+
         /** @type {BoatConfig} */
         #boat = { ...DEFAULT_BOAT };
         #boatType = "Batel";
@@ -79,6 +100,12 @@ customElements.define(
             this.#clearErrors();
             this.#boatType = value;
             this.boatNameSpan.textContent = value;
+            this.#initSnippets();
+        }
+
+        /** @returns {string} */
+        get snippetPath() {
+            return `./configs/${this.#boatType.toLowerCase()}/`;
         }
 
         constructor() {
@@ -89,9 +116,11 @@ customElements.define(
 
         connectedCallback() {
             this.form = this.shadowRoot.querySelector("#boat-form");
+            this.collapsibleContent = this.shadowRoot.querySelector("#collapsible-content");
             this.formHeader = this.shadowRoot.querySelector(".form-header");
             this.arrow = this.shadowRoot.querySelector(".arrow");
             this.boatNameSpan = this.shadowRoot.querySelector("#boat-name");
+            this.snippetSelect = this.shadowRoot.querySelector("#snippets");
 
             this.lengthInput = this.shadowRoot.querySelector("#length");
             this.bowInput = this.shadowRoot.querySelector("#bow");
@@ -102,17 +131,22 @@ customElements.define(
             this.ribsInput = this.shadowRoot.querySelector("#ribs");
             this.rowlocksInput = this.shadowRoot.querySelector("#rowlocks");
             this.rowlockGapInput = this.shadowRoot.querySelector("#rowlock-gap");
+            this.ratioSweetSpotInput = this.shadowRoot.querySelector("#ratio-sweet-spot");
 
             this.#init();
 
             this.form.addEventListener("change", () => this.#onChange());
+            this.snippetSelect.addEventListener("input", (e) => this.#onChangeSnippet(e.target.value));
 
             this.formHeader.addEventListener("click", () => {
-                if (this.form.style.display && (this.form.style.display === "none" || this.form.style.display === "")) {
-                    this.form.style.display = "block";
+                if (
+                    this.collapsibleContent.style.display &&
+                    (this.collapsibleContent.style.display === "none" || this.collapsibleContent.style.display === "")
+                ) {
+                    this.collapsibleContent.style.display = "block";
                     this.arrow.style.transform = "rotate(180deg)";
                 } else {
-                    this.form.style.display = "none";
+                    this.collapsibleContent.style.display = "none";
                     this.arrow.style.transform = "rotate(0deg)";
                 }
             });
@@ -169,7 +203,8 @@ customElements.define(
             return isValid;
         }
 
-        #init() {
+        /** @param {boolean} [preserveSnippet] */
+        #init(preserveSnippet = false) {
             this.lengthInput.value = this.#boat.length;
             this.bowInput.value = this.#boat.bowFloatingLine;
             this.sternInput.value = this.#boat.sternFloatingLine;
@@ -179,8 +214,7 @@ customElements.define(
             this.ribsInput.value = this.#boat.ribs.join(", ");
             this.rowlocksInput.value = this.#boat.rowlocks.join(", ");
             this.rowlockGapInput.value = this.#boat.rowlockGap;
-
-            this.form.style.display = "none";
+            this.ratioSweetSpotInput.value = this.#boat.sweetSpot.join(", ");
 
             this.errors = {
                 length: this.shadowRoot.querySelector("#length-error"),
@@ -189,6 +223,27 @@ customElements.define(
                 rowlocks: this.shadowRoot.querySelector("#rowlocks-error"),
                 rowlockGap: this.shadowRoot.querySelector("#rowlock-gap-error"),
             };
+
+            if (!preserveSnippet) {
+                this.collapsibleContent.style.display = "none";
+                this.#initSnippets();
+            }
+        }
+
+        #initSnippets() {
+            this.snippetSelect.style.display = "block";
+
+            if (this.SNIPPETS[this.#boatType.toLowerCase()].length === 0) {
+                this.snippetSelect.style.display = "none";
+                return;
+            }
+
+            const html = [`<option value="${-1}" selected disabled>Plantillas</option>`];
+            this.SNIPPETS[this.#boatType.toLowerCase()].forEach((snippet, idx) => {
+                html.push(`<option value="${idx}">${snippet.name}</option>`);
+            });
+
+            this.snippetSelect.innerHTML = html.join("");
         }
 
         #onChange() {
@@ -203,8 +258,21 @@ customElements.define(
             this.#boat.ribs = this.ribsInput.value.split(",").map((num) => parseInt(num.trim()));
             this.#boat.rowlocks = this.rowlocksInput.value.split(",").map((num) => parseInt(num.trim()));
             this.#boat.rowlockGap = parseInt(this.rowlockGapInput.value);
+            this.#boat.sweetSpot = this.ratioSweetSpotInput.value.split(",").map((num) => parseFloat(num.trim()));
 
             this.isValid();
+        }
+
+        /** @param {number} idx */
+        async #onChangeSnippet(idx) {
+            const path = this.snippetPath + this.SNIPPETS[this.#boatType.toLowerCase()][idx].path;
+            const response = await fetch(path);
+            const text = await response.text();
+
+            this.#boat = JSON.parse(text);
+            this.#init(true);
+
+            app.onChangeSnippet(this.#boat);
         }
 
         #clearErrors() {

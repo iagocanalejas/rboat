@@ -52,4 +52,5 @@
  * @typedef {Object} BoatResult
  * @property {number} centerOfGravity
  * @property {number} ratio
+ * @property {number} qualityPerception
  */

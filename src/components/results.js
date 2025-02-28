@@ -24,7 +24,7 @@ template.innerHTML = `
 .results div:last-child {
     border-bottom: none;
 }
-.results span {
+.results span, label {
     font-size: 14px;
     color: #bbb;
 }
@@ -70,6 +70,11 @@ template.innerHTML = `
 		<span>Ratio (mayor igual mas peso en proa)</span>
 		<span id="ratio-result">---</span>
 	</div>
+	<div>
+		<label for="quality">Percepción:</label>
+		<input id="quality" type="range" min="0" max="5" step="1" value="3" disabled>
+		<output id="quality-output" style="margin-right: 5px;">3</output>
+	</div>
 </div>
 <div><button id="calculate" class="button">Calcular</button></div>
 <div><button id="save" class="button">Guardar</button></div>
@@ -96,6 +101,9 @@ customElements.define(
             this.ratioResult.textContent = this.#result.ratio.toFixed(2);
             this.gravityCenterResult.textContent = this.#result.centerOfGravity.toFixed(2);
 
+            this.#onChangeQuality(this.#result.qualityPerception);
+            this.qualitySelector.disabled = false;
+
             if (this.#sweetSpot && this.#result.ratio > this.#sweetSpot[0] && this.#result.ratio < this.#sweetSpot[1]) {
                 this.gravityCenterResult.style.color = "green";
                 this.ratioResult.style.color = "green";
@@ -121,9 +129,18 @@ customElements.define(
         connectedCallback() {
             this.ratioResult = this.shadowRoot.querySelector("#ratio-result");
             this.gravityCenterResult = this.shadowRoot.querySelector("#gravity-center-result");
+            this.qualitySelector = this.shadowRoot.querySelector("#quality");
+            this.qualityOutput = this.shadowRoot.querySelector("#quality-output");
 
+            this.qualitySelector.addEventListener("input", () => this.#onChangeQuality());
             this.shadowRoot.querySelector("#calculate").addEventListener("click", () => app.calculate());
             this.shadowRoot.querySelector("#save").addEventListener("click", () => app.save());
+        }
+
+        /** @param {number | undefined} value */
+        #onChangeQuality(value) {
+            this.#result.qualityPerception = value || this.qualitySelector.value;
+            this.qualityOutput.value = value || this.qualitySelector.value;
         }
     },
 );
